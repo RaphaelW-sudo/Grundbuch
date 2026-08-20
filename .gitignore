@@ -1,0 +1,6 @@
+# Qt Creator & Build Dateien ignorieren
+build/
+*.user
+.qtcreator/
+*.o
+*.obj
