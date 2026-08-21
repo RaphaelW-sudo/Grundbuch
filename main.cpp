@@ -331,22 +331,26 @@ int main(int argc, char *argv[])
             qDebug() << QString::fromStdString(temp);
         }*/
         vector<House> showablehouses;
+        long long showlaenge=0;
         for(string Id:suchergebnisse){
             for(House temp: cityy){
                 if(temp.getHouseId()==Id){
                     showablehouses.push_back(temp);
+                    showlaenge+=temp.getHuman().size();
                 }
             }
         }
+        
+    QWidget *showzeigscreen[ceil(showlaenge/15)];
+    QGridLayout *gridshowzeigscreen = new QGridLayout(showzeigscreen);
+
     });
 
     stackedWidget->addWidget(suchscreen);
     //Ende suchscreen
     //--------------------------------------------
     //hier Zeug fuer showzeigscreen
-    QWidget *showzeigscreen = new QWidget();
-    QGridLayout *gridshowzeigscreen = new QGridLayout(showzeigscreen);
-
+    
 
     //Ende Showzeigscreen
     //--------------------------------------------
@@ -355,8 +359,6 @@ int main(int argc, char *argv[])
     QGridLayout *gridshowscreen = new QGridLayout(showscreen);
 
     stackedWidget->addWidget(showscreen);
-
-    stackedWidget->addWidget(showzeigscreen);
 
     //Ende Showscreen
 
