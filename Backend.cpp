@@ -1,122 +1,70 @@
+#include "Backend.h"
 #include <iostream>
-#include <string>
-#include <vector>
-#include <fstream>
-#include <limits>
 #include <QString>
-#include <QApplication>
-#include <QWidget>
-#include <vector>
-#include <QMessageBox>
-#include <string>
-#include <QPushButton>
-#include <QVBoxLayout>
-#include <QGridLayout>
-#include <QApplication>
-#include <QDialog>
-#include <QLineEdit>
-#include <QStackedWidget>
-#include <QLabel>
-#include <QShortcut>
-#include <QKeySequence>
-#include <array>
+#include <QDebug>
 
 using namespace std;
 
-enum class Gender {
-    STRAIGHT,
-    GAY,
-    BI,
-    TRANS,
-    NONBINARY,
-    NONE
-};
-
-class Adresse {
-private:
-    string city;
-    string street;
-    string number;
-
-public:
-    Adresse(string city, string street, string number)
-        : city(move(city)), street(move(street)), number(move(number)) {}
-
-    string getCity() const { return city; }
-    string getStreet() const { return street; }
-    string getNumber() const { return number; }
-
-    void setCity(const string& c) { city = c; }
-    void setStreet(const string& s) { street = s; }
-    void setNumber(const string& n) { number = n; }
-};
-
-class Human {
-private:
-    string name;
-    int age;
-    Gender sex;
-    vector<Adresse> adress;
-
-public:
-    Human(string name, int age, Adresse adres, Gender sex)
-        : name(move(name)), age(age), sex(sex){
-        adress.push_back(adres);
-    }
-    Human(){}
-    string getName() const { return name; }
-    int getAge() const { return age; }
-    Gender getGender() const { return sex; }
-    Adresse getAdress(int i) const { return adress[i]; }
-    vector<Adresse>& getAdresse() { return adress; }
-
-    void setName(const string& n) { name = n; }
-    void setAge(int a) { age = a; }
-    void setGender(Gender g) { sex = g; }
-    void setAdresse(const vector<Adresse>& a) { adress = a; }
-};
-
-class House {
-private:
-    string Houseid;
-    vector<Human> humann;
-    Adresse adress;
-    int groesse;
-    int wert;
-    int preisquad;
-
-public:
-    House(Human h, Adresse a, int g, int w, int p)
-        : groesse(g), wert(w), preisquad(p),adress(a) {
-        humann.push_back(h);
-        string Houseid=a.getCity()+a.getStreet()+a.getNumber()+to_string(g)+to_string(w);
-    }
-
-    string getHouseid() const{return Houseid;}
-    Human getHuman(int i) const { return humann[i]; }
-    vector<Human>& getHuman() { return humann; }
-    Adresse getAdress()const {return adress;}
-    int getAnzahlPers() const{return humann.size();}
-    int getGroesse() const { return groesse; }
-    int getWert() const { return wert; }
-    int getPreisquad() const { return preisquad; }
-
-    void setHuman(const vector<Human>& h) { humann = h; }
-    void setAdress(const Adresse& a) { adress = a; }
-    void setGroesse(int g) { groesse = g; }
-    void setWert(int w) { wert = w; }
-    void setPreisquad(int p) { preisquad = p; }
-};
-
 vector<House> cityy;
 
-// Hilfsfunktionen
+Adresse::Adresse(string city, string street, string number)
+    : city(move(city)), street(move(street)), number(move(number)) {}
+
+string Adresse::getCity() const { return city; }
+string Adresse::getStreet() const { return street; }
+string Adresse::getNumber() const { return number; }
+void Adresse::setCity(const string& c) { city = c; }
+void Adresse::setStreet(const string& s) { street = s; }
+void Adresse::setNumber(const string& n) { number = n; }
+
+
+Human::Human() : age(0), sex(Gender::NONE) {}
+
+Human::Human(string name, int age, Adresse adres, Gender sex)
+    : name(move(name)), age(age), sex(sex) {
+    adress.push_back(adres);
+}
+
+string Human::getName() const { return name; }
+int Human::getAge() const { return age; }
+Gender Human::getGender() const { return sex; }
+Adresse Human::getAdress(int i) const { return adress[i]; }
+vector<Adresse>& Human::getAdresse() { return adress; }
+const vector<Adresse>& Human::getAdresse() const { return adress; }
+void Human::setName(const string& n) { name = n; }
+void Human::setAge(int a) { age = a; }
+void Human::setGender(Gender g) { sex = g; }
+void Human::setAdresse(const vector<Adresse>& a) { adress = a; }
+
+
+House::House(Human h, Adresse a, int g, int w, int p)
+    : adress(a), groesse(g), wert(w), preisquad(p) {
+    humann.push_back(h);
+    HouseId = a.getCity() + a.getStreet() + a.getNumber() + to_string(g) + to_string(w);
+}
+
+string House::getHouseId() const { return HouseId; }
+Human House::getHuman(int i) const { return humann[i]; }
+vector<Human> House::getHuman() const { return humann; }
+Adresse House::getAdress() const { return adress; }
+int House::getAnzahlPers() const { return humann.size(); }
+int House::getGroesse() const { return groesse; }
+int House::getWert() const { return wert; }
+int House::getPreisquad() const { return preisquad; }
+
+void House::setHuman(const vector<Human>& h) { humann = h; }
+void House::setAdress(const Adresse& a) { adress = a; }
+void House::setGroesse(int g) { groesse = g; }
+void House::setWert(int w) { wert = w; }
+void House::setPreisquad(int p) { preisquad = p; }
+
+
 Gender chooseg(const string& choose) {
-    if (QString::fromStdString(choose).compare(QString::fromStdString("gay"), Qt::CaseInsensitive) == 0) return Gender::GAY;
-    if (QString::fromStdString(choose).compare(QString::fromStdString("bi"), Qt::CaseInsensitive) == 0) return Gender::BI;
-    if (QString::fromStdString(choose).compare(QString::fromStdString("trans"), Qt::CaseInsensitive) == 0) return Gender::TRANS;
-    if (QString::fromStdString(choose).compare(QString::fromStdString("nonbinary"), Qt::CaseInsensitive) == 0) return Gender::NONBINARY;
-    if (QString::fromStdString(choose).compare(QString::fromStdString("straight"), Qt::CaseInsensitive) == 0) return Gender::STRAIGHT;
+    if (QString::fromStdString(choose).compare("gay", Qt::CaseInsensitive) == 0) return Gender::GAY;
+    if (QString::fromStdString(choose).compare("bi", Qt::CaseInsensitive) == 0) return Gender::BI;
+    if (QString::fromStdString(choose).compare("trans", Qt::CaseInsensitive) == 0) return Gender::TRANS;
+    if (QString::fromStdString(choose).compare("nonbinary", Qt::CaseInsensitive) == 0) return Gender::NONBINARY;
+    if (QString::fromStdString(choose).compare("straight", Qt::CaseInsensitive) == 0) return Gender::STRAIGHT;
     return Gender::NONE;
 }
 
@@ -132,76 +80,81 @@ string genderToString(Gender g) {
 }
 
 void writefile(const House& house, ofstream& file) {
-    /*  if (!file.is_open()) return;
-
-    file << house.getHuman().getName() << "\n,\n"
-         << house.getHuman().getAge() << "\n,\n"
-         << house.getHuman().getAdress().getCity() << "\n,\n"
-         << house.getHuman().getAdress().getStreet() << "\n,\n"
-         << house.getHuman().getAdress().getNumber() << "\n,\n"
-         << genderToString(house.getHuman().getGender()) << "\n.\n";
-*/
+    // Left unimplemented as in your original file
 }
 
-vector<string> searchByName(const string& input){
+vector<string> searchByName(const string& input) {
     vector<string> output;
-    for(House temp:cityy){
-        for(Human humantemp:temp.getHuman()){
-            if(humantemp.getName()==input)output.push_back(temp.getHouseid());
+    for (const auto& temp : cityy) {
+        for (const auto& humantemp : temp.getHuman()) {
+            if (humantemp.getName() == input) {
+                output.push_back(temp.getHouseId());
+                break;
+            }
         }
     }
     return output;
 }
 
-vector<string> searchByCity(const string& input){
+vector<string> searchByCity(const string& input) {
     vector<string> output;
-    for(House temp:cityy){
-        if(temp.getAdress().getCity()==input)output.push_back(temp.getHouseid());
+    for (const auto& temp : cityy) {
+        if (temp.getAdress().getCity() == input) {
+            output.push_back(temp.getHouseId());
+        }
     }
     return output;
 }
 
-vector<string> searchByStreet(const string& input){
+vector<string> searchByStreet(const string& input) {
     vector<string> output;
-    for(House temp:cityy){
-        if(temp.getAdress().getStreet()==input)output.push_back(temp.getHouseid());
+    for (const auto& temp : cityy) {
+        if (temp.getAdress().getStreet() == input) {
+            output.push_back(temp.getHouseId());
+        }
     }
     return output;
 }
 
-vector<string> searchByNumber(const string& input){
+vector<string> searchByGender(const string& input) {
     vector<string> output;
-    for(House temp:cityy){
-        if(temp.getAdress().getNumber()==input)output.push_back(temp.getHouseid());
+    for (const auto& temp : cityy) {
+        for (const auto& humantemp : temp.getHuman()) {
+            if (humantemp.getGender() == chooseg(input)) {
+                output.push_back(temp.getHouseId());
+                break;
+            }
+        }
     }
     return output;
 }
 
-vector<string> searchByGender(const string& input){
+vector<string> searchByNumber(const string& input) {
     vector<string> output;
-    for(House temp:cityy){
-        for(Human humantemp: temp.getHuman())
-            if(genderToString(humantemp.getGender())==input){output.push_back(temp.getHouseid());break;}
+    for (const auto& temp : cityy) {
+        if (temp.getAdress().getNumber() == input) {
+            output.push_back(temp.getHouseId());
+        }
     }
     return output;
 }
-
-
 
 bool searchalreadyinPerson(const string& query) {
-    for (auto& house : cityy) {
-        for (auto& human : house.getHuman()) {
-            if (human.getName() == query) return true;
+    for (const auto& temp : cityy) {
+        for (const auto& humantemp : temp.getHuman()) {
+            if (humantemp.getName() == query) {
+                return true;
+            }
         }
     }
     return false;
 }
 
 bool searchalreadyinAdress(const array<string, 3>& query) {
-    for (const auto& house : cityy) {
-        if (house.getAdress().getCity() == query[0] &&
-            house.getAdress().getStreet() == query[1] &&
-            house.getAdress().getNumber() == query[2]) {
+    for (const auto& temp : cityy) {
+        if (temp.getAdress().getCity() == query[0] &&
+            temp.getAdress().getStreet() == query[1] &&
+            temp.getAdress().getNumber() == query[2]) {
             return true;
         }
     }
@@ -209,15 +162,13 @@ bool searchalreadyinAdress(const array<string, 3>& query) {
 }
 
 bool searchPersonalreadyAdress(const array<string, 3>& query, const string& person) {
-    for (auto& house : cityy) {
-        for (auto& human : house.getHuman()) {
-            if (human.getName() == person) {
-                for (const auto& addr : human.getAdresse()) {
-                    if (addr.getCity() == query[0] &&
-                        addr.getStreet() == query[1] &&
-                        addr.getNumber() == query[2]) {
-                        return true;
-                    }
+    for (const auto& temp : cityy) {
+        if (temp.getAdress().getCity() == query[0] &&
+            temp.getAdress().getStreet() == query[1] &&
+            temp.getAdress().getNumber() == query[2]) {
+            for (const auto& humantemp : temp.getHuman()) {
+                if (humantemp.getName() == person) {
+                    return true;
                 }
             }
         }
@@ -225,41 +176,40 @@ bool searchPersonalreadyAdress(const array<string, 3>& query, const string& pers
     return false;
 }
 
-
 void addEntry(string name, string city, string street, string number, string genderStr, int age, int price, int size) {
-    if (searchalreadyinPerson(name)) {
-        if (searchPersonalreadyAdress({city, street, number}, name)) {
-            qDebug() << "Already in System";
-        } else {
-            for (auto& house : cityy) {
-                for (auto& human : house.getHuman()) {
-                    if (human.getName() == name) {
-                        human.getAdresse().push_back(Adresse(city, street, number));
-                        qDebug() << "Person gefunden, neue Adresse hinzugefügt";
-                    }
-                }
-            }
-        }
-    } else if (searchalreadyinAdress({city, street, number})) {
-        Adresse temp(city, street, number);
-        for (auto& house : cityy) {
-            if (house.getAdress().getCity() == city &&
-                house.getAdress().getStreet() == street &&
-                house.getAdress().getNumber() == number) {
+    Gender gender = chooseg(genderStr);
+    Adresse newAdresse(city, street, number);
+    Human newHuman(name, age, newAdresse, gender);
+    bool houseFound = false;
 
-                house.getHuman().push_back(Human(name, age, temp, chooseg(genderStr)));
-                qDebug() << "Person zu existierendem Haus hinzugefügt";
-                break;
-            }
+    for (auto& house : cityy) {
+        if (house.getAdress().getCity() == city &&
+            house.getAdress().getStreet() == street &&
+            house.getAdress().getNumber() == number) {
+
+            vector<Human> currentHumans = house.getHuman();
+            currentHumans.push_back(newHuman);
+            house.setHuman(currentHumans);
+            houseFound = true;
+            break;
         }
-    } else {
-        int preisquad = (price > 0) ? size / price : 0;
-        cityy.push_back(House(Human(name, age, Adresse(city, street, number), chooseg(genderStr)),
-                              Adresse(city, street, number), price, size, preisquad));
-        qDebug() << "Neues Haus geadded";
+    }
+
+    if (!houseFound) {
+        House newHouse(newHuman, newAdresse, size, price * size, price);
+        cityy.push_back(newHouse);
     }
 }
 
 void setup() {
-    ofstream grundbuchFile("Grundbuch.txt", ios::app);
+    addEntry("Lukas", "Berlin", "Hauptstrasse", "10", "straight", 25, 300, 50);
+    addEntry("Anna", "München", "Bahnhofstraße", "5", "straight", 30, 450, 80);
+    addEntry("Tom", "Hamburg", "Reeperbahn", "1", "bi", 22, 200, 40);
+    addEntry("Julia", "Berlin", "Hauptstrasse", "10", "gay", 26, 300, 50);
+    addEntry("Max", "Köln", "Domplatz", "3", "trans", 28, 500, 90);
+    addEntry("Sophie", "München", "Bahnhofstraße", "5", "nonbinary", 24, 450, 80);
+    addEntry("Leon", "Stuttgart", "Königstraße", "12", "straight", 35, 400, 70);
+    addEntry("Mia", "Frankfurt", "Zeil", "8", "straight", 29, 600, 100);
+    addEntry("Paul", "Hamburg", "Reeperbahn", "1", "gay", 23, 200, 40);
+    addEntry("Lina", "Düsseldorf", "Königsallee", "15", "straight", 32, 700, 120);
 }

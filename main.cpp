@@ -17,12 +17,11 @@
 #include <QKeySequence>
 
 using namespace std;
+
 vector<string> mergeCommonUnsortedStrings(const vector<vector<string>>& vectors) {
     if (vectors.empty()) return {};
 
-
     unordered_set<string> common(vectors[0].begin(), vectors[0].end());
-
 
     for (size_t i = 1; i < vectors.size(); ++i) {
         unordered_set<string> current(vectors[i].begin(), vectors[i].end());
@@ -33,12 +32,12 @@ vector<string> mergeCommonUnsortedStrings(const vector<vector<string>>& vectors)
                 nextCommon.insert(str);
             }
         }
-        common = move(nextCommon);
+        common = std::move(nextCommon);
     }
-
 
     return vector<string>(common.begin(), common.end());
 }
+
 void registerPerson(string stadt, string strasse, string hausnummer, int preis, int groesse, int PersonNr, QWidget* parent = nullptr) {
     QDialog dialog(parent);
     dialog.setWindowTitle("Bestätigung");
@@ -90,9 +89,9 @@ void registerPerson(string stadt, string strasse, string hausnummer, int preis, 
                  genderinput->text().toStdString(), ageinput->text().trimmed().toInt(), preis, groesse);
     }
 }
+
 int main(int argc, char *argv[])
 {
-
     QApplication app(argc, argv);
 
     QWidget window;
@@ -119,15 +118,15 @@ int main(int argc, char *argv[])
     QShortcut *shortcutEsc = new QShortcut(QKeySequence(Qt::Key_Escape),&window);
     QObject::connect(shortcutEsc, &QShortcut::activated, &window, [&stackedWidget, &window](){
         if(stackedWidget->currentIndex()==0){
-        QMessageBox::StandardButton reply = QMessageBox::question(
-            &window,
-            "Schliessen",
-            "Möchtest du dieses Fenster schliessen?",
-            QMessageBox::Yes | QMessageBox::No
-            );
+            QMessageBox::StandardButton reply = QMessageBox::question(
+                &window,
+                "Schliessen",
+                "Möchtest du dieses Fenster schliessen?",
+                QMessageBox::Yes | QMessageBox::No
+                );
             if(reply==QMessageBox::Yes){
-            &QWidget::close;
-            window.close();
+                &QWidget::close;
+                window.close();
             }
         }else{
             stackedWidget->setCurrentIndex(0);
@@ -150,8 +149,6 @@ int main(int argc, char *argv[])
         "}"
         );
     hinzuf->setFixedWidth(700);
-
-
 
     QPushButton *suchen = new QPushButton("Was suchen");
     suchen->setCheckable(true);
@@ -187,9 +184,6 @@ int main(int argc, char *argv[])
         );
     show->setFixedWidth(700);
 
-
-
-
     QObject::connect(hinzuf,&QPushButton::clicked,[stackedWidget](){
         stackedWidget->setCurrentIndex(1);
     });
@@ -218,7 +212,6 @@ int main(int argc, char *argv[])
     gridhinzufscreen->addWidget(auslesen,7,0,Qt::AlignCenter);
 
     vector<QLineEdit*> ersterinput;
-
     vector<string*> ersterinputstring;
 
     for(int i=0;i<6;i++){
@@ -236,7 +229,6 @@ int main(int argc, char *argv[])
     ersterinput[4]->setPlaceholderText("Welcher Preis");
     ersterinput[5]->setPlaceholderText("Wie viele Personen?");
 
-
     QObject::connect(auslesen,&QPushButton::clicked,[&window,auslesen,ersterinput,ersterinputstring](){
         bool hatLeeresFeld = false;
 
@@ -246,7 +238,6 @@ int main(int argc, char *argv[])
                 break;
             }
         }
-
 
         if (hatLeeresFeld) {
             qDebug() << "Fehler: Bitte fülle erst alle Felder aus!";
@@ -267,11 +258,9 @@ int main(int argc, char *argv[])
         string strasse = ersterinput[1]->text().toStdString();
         string hausnr  = ersterinput[2]->text().toStdString();
         for(int i = 0;i<personen;++i){
-        registerPerson(stadt,strasse,hausnr,preis,qm,i+1,&window);
+            registerPerson(stadt,strasse,hausnr,preis,qm,i+1,&window);
         }
     });
-
-
 
     stackedWidget->addWidget(hinzufscreen);
     //Ende hinzufscreen
@@ -313,18 +302,35 @@ int main(int argc, char *argv[])
         }
         if(!voll)return;
 
-        if(chooseg(erstersuchinput[4]->text().toStdString())!=Gender::NONE)return;
+        QString genderText = erstersuchinput[4]->text().trimmed();
+        if (!genderText.isEmpty() && chooseg(genderText.toStdString()) == Gender::NONE) {
+            return;
+        }
         //---------------------------------------
         //jetzt das suchen kolleg
+        vector<vector<string>> uebergeben;
 
+        for(QLineEdit *Line: erstersuchinput){
+            if(!Line->text().isEmpty()){
+                if (!erstersuchinput[0]->text().isEmpty())
+                    uebergeben.push_back(searchByCity(erstersuchinput[0]->text().toStdString()));
+                if (!erstersuchinput[1]->text().isEmpty())
+                    uebergeben.push_back(searchByStreet(erstersuchinput[1]->text().toStdString()));
+                if (!erstersuchinput[2]->text().isEmpty())
+                    uebergeben.push_back(searchByNumber(erstersuchinput[2]->text().toStdString()));
+                if (!erstersuchinput[3]->text().isEmpty())
+                    uebergeben.push_back(searchByName(erstersuchinput[3]->text().toStdString()));
+                if (!erstersuchinput[4]->text().isEmpty())
+                    uebergeben.push_back(searchByGender(erstersuchinput[4]->text().toStdString()));
+            }
+        }
 
+        vector<string> suchergebnisse=mergeCommonUnsortedStrings(uebergeben);
 
+        for (const auto& temp : suchergebnisse) { // Referenz für string range-for
+            qDebug() << QString::fromStdString(temp);
+        }
     });
-
-
-
-
-
 
     stackedWidget->addWidget(suchscreen);
     //Ende suchscreen
@@ -333,42 +339,19 @@ int main(int argc, char *argv[])
     QWidget *showzeigscreen = new QWidget();
     QGridLayout *gridshowzeigscreen = new QGridLayout(showzeigscreen);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     //Ende Showzeigscreen
     //--------------------------------------------
     //hier Zeug fuer showscreen
     QWidget *showscreen = new QWidget();
     QGridLayout *gridshowscreen = new QGridLayout(showscreen);
 
-
-
-
-
-
-
-
-
-
-
-
-
     stackedWidget->addWidget(showscreen);
-    stackedWidget->addWidget(showzeigscreen);
-    //Ende Showscreen
-    window.show();
 
+    stackedWidget->addWidget(showzeigscreen);
+
+    //Ende Showscreen
+
+    window.show();
 
     return app.exec();
 }
