@@ -17,7 +17,28 @@
 #include <QKeySequence>
 
 using namespace std;
+vector<string> mergeCommonUnsortedStrings(const vector<vector<string>>& vectors) {
+    if (vectors.empty()) return {};
 
+    // 1. Load first vector into a set
+    unordered_set<string> common(vectors[0].begin(), vectors[0].end());
+
+    // 2. Intersect with each subsequent vector
+    for (size_t i = 1; i < vectors.size(); ++i) {
+        unordered_set<string> current(vectors[i].begin(), vectors[i].end());
+        unordered_set<string> nextCommon;
+
+        for (const auto& str : common) {
+            if (current.count(str)) { // Checks if string exists in current vector
+                nextCommon.insert(str);
+            }
+        }
+        common = move(nextCommon);
+    }
+
+    // 3. Convert back to vector
+    return vector<string>(common.begin(), common.end());
+}
 void registerPerson(string stadt, string strasse, string hausnummer, int preis, int groesse, int PersonNr, QWidget* parent = nullptr) {
     QDialog dialog(parent);
     dialog.setWindowTitle("Bestätigung");
@@ -197,7 +218,9 @@ int main(int argc, char *argv[])
     gridhinzufscreen->addWidget(auslesen,7,0,Qt::AlignCenter);
 
     vector<QLineEdit*> ersterinput;
+
     vector<string*> ersterinputstring;
+
     for(int i=0;i<6;i++){
         QLineEdit *Line = new QLineEdit();
         Line->setStyleSheet("font-size: 22px; padding: 8px 12px;");
@@ -243,7 +266,6 @@ int main(int argc, char *argv[])
         string stadt   = ersterinput[0]->text().toStdString();
         string strasse = ersterinput[1]->text().toStdString();
         string hausnr  = ersterinput[2]->text().toStdString();
-        auslesen->setText("gedruecket");
         for(int i = 0;i<personen;++i){
         registerPerson(stadt,strasse,hausnr,preis,qm,i+1,&window);
         }
@@ -256,14 +278,45 @@ int main(int argc, char *argv[])
     //----------------------------------------------
     //hier Zeug fuer suchscreen
     QWidget *suchscreen = new QWidget();
+
     QGridLayout *gridsuchscreen = new QGridLayout(suchscreen);
 
+    vector<QLineEdit*> erstersuchinput;
 
+    QLabel *titelsuch = new QLabel("Suchen nach Stadt, Strasse oder Name");
+    titelsuch->setStyleSheet("font-size:24px");
+    gridsuchscreen->addWidget(titelsuch,0,0,Qt::AlignCenter);
 
+    for(int i=0;i<5;i++){
+        QLineEdit *Line = new QLineEdit();
+        Line->setStyleSheet("font-size: 22px; padding: 8px 12px;");
+        Line->setMinimumWidth(450);
+        gridsuchscreen->addWidget(Line,i+2,0,Qt::AlignCenter);
+        erstersuchinput.push_back(Line);
+    }
 
+    erstersuchinput[0]->setPlaceholderText("Nach Stadt suchen:");
+    erstersuchinput[1]->setPlaceholderText("Nach Strasse suchen:");
+    erstersuchinput[2]->setPlaceholderText("Nach Hausnummer suchen:");
+    erstersuchinput[3]->setPlaceholderText("Nach Name suchen:");
+    erstersuchinput[4]->setPlaceholderText("Nach sex. Ausrichtung suchen:");
 
+    QPushButton *suchenauslesen = new QPushButton("eingeben");
+    suchenauslesen->setStyleSheet("padding: 30px 200px");
+    gridsuchscreen->addWidget(suchenauslesen,7,0,Qt::AlignCenter);
 
+    QObject::connect(suchenauslesen,&QPushButton::clicked,[erstersuchinput](){
+        //Felder pruefen
+        bool voll=false;
+        for(QLineEdit *Line: erstersuchinput) {
+            if(!Line->text().trimmed().isEmpty())voll=true;
+        }
+        if(!voll)return;
 
+        if(chooseg(erstersuchinput[4]->text().toStdString())!=Gender::NONE)return;
+        //---------------------------------------
+
+    });
 
 
 
@@ -272,6 +325,25 @@ int main(int argc, char *argv[])
 
     stackedWidget->addWidget(suchscreen);
     //Ende suchscreen
+    //--------------------------------------------
+    //hier Zeug fuer showzeigscreen
+    QWidget *showzeigscreen = new QWidget();
+    QGridLayout *gridshowzeigscreen = new QGridLayout(showzeigscreen);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //Ende Showzeigscreen
     //--------------------------------------------
     //hier Zeug fuer showscreen
     QWidget *showscreen = new QWidget();
@@ -290,6 +362,7 @@ int main(int argc, char *argv[])
 
 
     stackedWidget->addWidget(showscreen);
+    stackedWidget->addWidget(showzeigscreen);
     //Ende Showscreen
     window.show();
 

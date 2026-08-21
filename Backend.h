@@ -54,6 +54,11 @@ public:
     Adresse getAdress(int i) const;
     std::vector<Adresse>& getAdresse();
     const std::vector<Adresse>& getAdresse() const;
+
+    void setName(const std::string& n);
+    void setAge(int a);
+    void setGender(Gender g);
+    void setAdresse(const std::vector<Adresse>& a);
 };
 
 class House {
@@ -75,6 +80,12 @@ public:
     int getGroesse() const;
     int getWert() const;
     int getPreisquad() const;
+
+    void setHuman(const std::vector<Human>& h);
+    void setAdress(const Adresse& a);
+    void setGroesse(int g);
+    void setWert(int w);
+    void setPreisquad(int p);
 };
 
 // --- Globale Variable ---

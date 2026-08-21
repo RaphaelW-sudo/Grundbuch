@@ -78,6 +78,7 @@ public:
 
 class House {
 private:
+    string Houseid;
     vector<Human> humann;
     Adresse adress;
     int groesse;
@@ -88,8 +89,10 @@ public:
     House(Human h, Adresse a, int g, int w, int p)
         : groesse(g), wert(w), preisquad(p),adress(a) {
         humann.push_back(h);
+        string Houseid=a.getCity()+a.getStreet()+a.getNumber()+to_string(g)+to_string(w);
     }
-
+    
+    H
     Human getHuman(int i) const { return humann[i]; }
     vector<Human>& getHuman() { return humann; }
     Adresse getAdress()const {return adress;}
