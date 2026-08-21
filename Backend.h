@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef BACKEND_H
+#define BACKEND_H
+#endif
+
 #include <string>
 #include <vector>
 #include <array>
@@ -63,6 +67,7 @@ public:
 
 class House {
 private:
+    std::string Houseid;
     std::vector<Human> humann;
     Adresse adress;
     int groesse = 0;
@@ -72,6 +77,7 @@ private:
 public:
     House(Human h, Adresse a, int g, int w, int p);
 
+    std::string getHouseid() const;
     Human getHuman(int i) const;
     std::vector<Human>& getHuman();
     const std::vector<Human>& getHuman() const;
@@ -97,8 +103,11 @@ std::string genderToString(Gender g);
 void writefile(const House& house, std::ofstream& file);
 
 // --- Such- und Logikfunktionen ---
-void searchByName(const std::string& input, const std::vector<House>& cityy);
-void searchByStreet(const std::string& input, const std::vector<House>& cityy);
+std::vector<std::string> searchByName(const std::string& input);
+std::vector<std::string> searchByStreet(const std::string& input);
+std::vector<std::string> searchByCity(const std::string& input);
+std::vector<std::string> searchByGender(const std::string& input);
+std::vector<std::string> searchByNumber(const std::string& input);
 
 bool searchalreadyinPerson(const std::string& query);
 bool searchalreadyinAdress(const std::array<std::string, 3>& query);

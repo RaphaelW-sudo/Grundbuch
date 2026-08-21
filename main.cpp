@@ -20,23 +20,23 @@ using namespace std;
 vector<string> mergeCommonUnsortedStrings(const vector<vector<string>>& vectors) {
     if (vectors.empty()) return {};
 
-    // 1. Load first vector into a set
+
     unordered_set<string> common(vectors[0].begin(), vectors[0].end());
 
-    // 2. Intersect with each subsequent vector
+
     for (size_t i = 1; i < vectors.size(); ++i) {
         unordered_set<string> current(vectors[i].begin(), vectors[i].end());
         unordered_set<string> nextCommon;
 
         for (const auto& str : common) {
-            if (current.count(str)) { // Checks if string exists in current vector
+            if (current.count(str)) {
                 nextCommon.insert(str);
             }
         }
         common = move(nextCommon);
     }
 
-    // 3. Convert back to vector
+
     return vector<string>(common.begin(), common.end());
 }
 void registerPerson(string stadt, string strasse, string hausnummer, int preis, int groesse, int PersonNr, QWidget* parent = nullptr) {
@@ -315,6 +315,9 @@ int main(int argc, char *argv[])
 
         if(chooseg(erstersuchinput[4]->text().toStdString())!=Gender::NONE)return;
         //---------------------------------------
+        //jetzt das suchen kolleg
+
+
 
     });
 

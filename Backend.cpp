@@ -78,6 +78,7 @@ public:
 
 class House {
 private:
+    string Houseid;
     vector<Human> humann;
     Adresse adress;
     int groesse;
@@ -88,8 +89,10 @@ public:
     House(Human h, Adresse a, int g, int w, int p)
         : groesse(g), wert(w), preisquad(p),adress(a) {
         humann.push_back(h);
+        string Houseid=a.getCity()+a.getStreet()+a.getNumber()+to_string(g)+to_string(w);
     }
 
+    string getHouseid() const{return Houseid;}
     Human getHuman(int i) const { return humann[i]; }
     vector<Human>& getHuman() { return humann; }
     Adresse getAdress()const {return adress;}
@@ -144,27 +147,46 @@ vector<string> searchByName(const string& input){
     vector<string> output;
     for(House temp:cityy){
         for(Human humantemp:temp.getHuman()){
-            if(humantemp.getName()==input)output.push_back(humantemp.getName());
+            if(humantemp.getName()==input)output.push_back(temp.getHouseid());
         }
     }
     return output;
 }
+
+vector<string> searchByCity(const string& input){
+    vector<string> output;
+    for(House temp:cityy){
+        if(temp.getAdress().getCity()==input)output.push_back(temp.getHouseid());
+    }
+    return output;
+}
+
 vector<string> searchByStreet(const string& input){
     vector<string> output;
     for(House temp:cityy){
-
+        if(temp.getAdress().getStreet()==input)output.push_back(temp.getHouseid());
     }
-
+    return output;
 }
-vector<string> searchByCity(const string& input){
 
-}
-vector<string> searchByGender(const string& input){
-
-}
 vector<string> searchByNumber(const string& input){
-
+    vector<string> output;
+    for(House temp:cityy){
+        if(temp.getAdress().getNumber()==input)output.push_back(temp.getHouseid());
+    }
+    return output;
 }
+
+vector<string> searchByGender(const string& input){
+    vector<string> output;
+    for(House temp:cityy){
+        for(Human humantemp: temp.getHuman())
+            if(genderToString(humantemp.getGender())==input){output.push_back(temp.getHouseid());break;}
+    }
+    return output;
+}
+
+
 
 bool searchalreadyinPerson(const string& query) {
     for (auto& house : cityy) {
