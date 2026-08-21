@@ -327,8 +327,16 @@ int main(int argc, char *argv[])
 
         vector<string> suchergebnisse=mergeCommonUnsortedStrings(uebergeben);
 
-        for (const auto& temp : suchergebnisse) { // Referenz für string range-for
+        /*for (const auto& temp : suchergebnisse) { // Referenz für string range-for
             qDebug() << QString::fromStdString(temp);
+        }*/
+        vector<House> showablehouses;
+        for(string Id:suchergebnisse){
+            for(House temp: cityy){
+                if(temp.getHouseId()==Id){
+                    showablehouses.push_back(temp);
+                }
+            }
         }
     });
 
@@ -338,6 +346,7 @@ int main(int argc, char *argv[])
     //hier Zeug fuer showzeigscreen
     QWidget *showzeigscreen = new QWidget();
     QGridLayout *gridshowzeigscreen = new QGridLayout(showzeigscreen);
+
 
     //Ende Showzeigscreen
     //--------------------------------------------
