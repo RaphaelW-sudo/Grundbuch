@@ -48,9 +48,12 @@ House::House(Human h, Adresse a, int g, int w, int p)
 string House::getHouseId() const { return HouseId; }
 Human House::getHuman(int i) const { return humann[i]; }
 vector<Human> House::getHuman() const { return humann; }
-QLabel getLabel(){
-string labelinput="";
-labelinput
+QLabel* House::getLabel(){
+string labelinput=adress.getCity()+", "+adress.getStreet()+" "+adress.getNumber()+"\nGroesse:"+to_string(groesse)+"qm, Preis:"+to_string(wert)+", Preis pro qm:"+to_string(preisquad)+"\nPersonen:";
+for(const Human& h: humann){
+    labelinput=labelinput+"\n"+h.getName()+", "+to_string(h.getAge())+" Jahre alt";
+}
+    return new QLabel(labelinput);
 }
 Adresse House::getAdress() const { return adress; }
 int House::getAnzahlPers() const { return humann.size(); }
