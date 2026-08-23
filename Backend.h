@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef BACKEND_H
+#def BACKEND_H
+#endif
+
 #include <string>
 #include <vector>
 #include <array>
