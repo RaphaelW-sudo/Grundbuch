@@ -1,7 +1,10 @@
+Backend.cpp
+
 #include "Backend.h"
 #include <iostream>
 #include <QString>
 #include <QDebug>
+#include <QLabel>
 
 using namespace std;
 
@@ -46,6 +49,10 @@ House::House(Human h, Adresse a, int g, int w, int p)
 string House::getHouseId() const { return HouseId; }
 Human House::getHuman(int i) const { return humann[i]; }
 vector<Human> House::getHuman() const { return humann; }
+QLabel getLabel(){
+string labelinput="";
+labelinput
+}
 Adresse House::getAdress() const { return adress; }
 int House::getAnzahlPers() const { return humann.size(); }
 int House::getGroesse() const { return groesse; }
