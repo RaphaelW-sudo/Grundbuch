@@ -1,3 +1,4 @@
+
 #include "mainwindow.h"
 #include "Backend.h"
 #include <QApplication>
@@ -92,6 +93,7 @@ void registerPerson(string stadt, string strasse, string hausnummer, int preis, 
 
 int main(int argc, char *argv[])
 {
+    äsetup();
     QApplication app(argc, argv);
 
     QWidget window;
@@ -342,6 +344,20 @@ int main(int argc, char *argv[])
         }
         
     QWidget *showzeigscreen[ceil(showlaenge/15)];
+    vector<vector<House>> housesproseite;
+    for(int i=0;i<ceil(showlaenge/15)){
+    if(showablehouses.empty())break;
+    for(int j=0;j<15;j++){
+    vector<House> seite;
+    if(showablehouses.empty())break;
+    short available=15;
+    seite.push_back(showablehouses[showablehouses.size()-1]);
+    available-=showablehouses[showablehouses.size()-1].getHuman().size();
+    if(available-showablehouses[showablehouses.size()-2]<0)break;
+    showablehouses.pop_back();
+   if(!seite.empty())housesproseite.push_back(seite);
+    }
+    }
     QGridLayout *gridshowzeigscreen = new QGridLayout(showzeigscreen);
 
     });
