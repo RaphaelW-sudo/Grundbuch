@@ -345,7 +345,7 @@ int main(int argc, char *argv[])
         
     QWidget *showzeigscreen[ceil(showlaenge/15)];
     vector<vector<House>> housesproseite;
-    for(int i=0;i<ceil(showlaenge/15)){
+    for(int i=0;i<ceil(showlaenge/15);i++){
     if(showablehouses.empty())break;
     for(int j=0;j<15;j++){
     vector<House> seite;
@@ -360,10 +360,12 @@ int main(int argc, char *argv[])
     }
     QGridLayout *gridshowzeigscreen = new QGridLayout(showzeigscreen);
     vector<QLabel*> showlabels;
-    for(auto&&[i,h]: std::views::enumerate(showablehouses)){
-    showlabels.pushback(h.getLabel());
-    gridshowzeigscreen->addWidget(showlabels[showlabels.size()-1],static_cast<int>(i),0);
-    }
+    for(const vector<House>& hps: housesproseite){
+        for(auto&&[i,h]: std::views::enumerate(hps)){
+        showlabels.push_back(h.getLabel());
+        gridshowzeigscreen->addWidget(showlabels[showlabels.size()-1],static_cast<int>(i),0);
+        }
+        }
     });
 
     stackedWidget->addWidget(suchscreen);
