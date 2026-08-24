@@ -329,7 +329,7 @@ int main(int argc, char *argv[])
 
         vector<string> suchergebnisse=mergeCommonUnsortedStrings(uebergeben);
 
-        /*for (const auto& temp : suchergebnisse) { // Referenz für string range-for
+        /*for (const auto& temp : suchergebnisse) { // Debug
             qDebug() << QString::fromStdString(temp);
         }*/
         vector<House> showablehouses;
@@ -359,7 +359,11 @@ int main(int argc, char *argv[])
     }
     }
     QGridLayout *gridshowzeigscreen = new QGridLayout(showzeigscreen);
-
+    vector<QLabel*> showlabels;
+    for(auto&&[i,h]: std::views::enumerate(showablehouses)){
+    showlabels.pushback(h.getLabel());
+    gridshowzeigscreen->addWidget(showlabels[showlabels.size()-1],static_cast<int>(i),0);
+    }
     });
 
     stackedWidget->addWidget(suchscreen);
