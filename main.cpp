@@ -296,80 +296,112 @@ int main(int argc, char *argv[])
     suchenauslesen->setStyleSheet("padding: 30px 200px");
     gridsuchscreen->addWidget(suchenauslesen,7,0,Qt::AlignCenter);
 
-    QObject::connect(suchenauslesen,&QPushButton::clicked,[erstersuchinput](){
-        //Felder pruefen
-        bool voll=false;
-        for(QLineEdit *Line: erstersuchinput) {
-            if(!Line->text().trimmed().isEmpty())voll=true;
-        }
-        if(!voll)return;
+    QObject::connect(suchenauslesen, &QPushButton::clicked, [this, erstersuchinput]() {
+    // 1. Felder prüfen
+    bool voll = false;
+    for (QLineEdit *Line : erstersuchinput) {
+        if (!Line->text().trimmed().isEmpty()) voll = true;
+    }
+    if (!voll) return;
 
-        QString genderText = erstersuchinput[4]->text().trimmed();
-        if (!genderText.isEmpty() && chooseg(genderText.toStdString()) == Gender::NONE) {
-            return;
-        }
-        //---------------------------------------
-        //jetzt das suchen kolleg
-        vector<vector<string>> uebergeben;
+    QString genderText = erstersuchinput[4]->text().trimmed();
+    if (!genderText.isEmpty() && chooseg(genderText.toStdString()) == Gender::NONE) {
+        return;
+    }
 
-        for(QLineEdit *Line: erstersuchinput){
-            if(!Line->text().isEmpty()){
-                if (!erstersuchinput[0]->text().isEmpty())
-                    uebergeben.push_back(searchByCity(erstersuchinput[0]->text().toStdString()));
-                if (!erstersuchinput[1]->text().isEmpty())
-                    uebergeben.push_back(searchByStreet(erstersuchinput[1]->text().toStdString()));
-                if (!erstersuchinput[2]->text().isEmpty())
-                    uebergeben.push_back(searchByNumber(erstersuchinput[2]->text().toStdString()));
-                if (!erstersuchinput[3]->text().isEmpty())
-                    uebergeben.push_back(searchByName(erstersuchinput[3]->text().toStdString()));
-                if (!erstersuchinput[4]->text().isEmpty())
-                    uebergeben.push_back(searchByGender(erstersuchinput[4]->text().toStdString()));
+    // 2. Suchen (Ohne überflüssige Schleife!)
+    vector<vector<string>> uebergeben;
+    if (!erstersuchinput[0]->text().isEmpty())
+        uebergeben.push_back(searchByCity(erstersuchinput[0]->text().toStdString()));
+    if (!erstersuchinput[1]->text().isEmpty())
+        uebergeben.push_back(searchByStreet(erstersuchinput[1]->text().toStdString()));
+    if (!erstersuchinput[2]->text().isEmpty())
+        uebergeben.push_back(searchByNumber(erstersuchinput[2]->text().toStdString()));
+    if (!erstersuchinput[3]->text().isEmpty())
+        uebergeben.push_back(searchByName(erstersuchinput[3]->text().toStdString()));
+    if (!erstersuchinput[4]->text().isEmpty())
+        uebergeben.push_back(searchByGender(erstersuchinput[4]->text().toStdString()));
+
+    vector<string> suchergebnisse = mergeCommonUnsortedStrings(uebergeben);
+
+    // 3. Häuser filtern (Mit Referenzen, um Kopien zu vermeiden)
+    vector<House> showablehouses;
+    for (const string& Id : suchergebnisse) {
+        for (const House& temp : cityy) { // cityy muss in der Klasse/Lambda verfügbar sein
+            if (temp.getHouseId() == Id) {
+                showablehouses.push_back(temp);
             }
         }
+    }
 
-        vector<string> suchergebnisse=mergeCommonUnsortedStrings(uebergeben);
+    // 4. Robuste Seiten-Aufteilung (Ohne pop_back)
+    vector<vector<House>> housesproseite;
+    vector<House> aktuelleSeite;
+    int personenAufSeite = 0;
 
-        /*for (const auto& temp : suchergebnisse) { // Debug
-            qDebug() << QString::fromStdString(temp);
-        }*/
-        vector<House> showablehouses;
-        long long showlaenge=0;
-        for(string Id:suchergebnisse){
-            for(House temp: cityy){
-                if(temp.getHouseId()==Id){
-                    showablehouses.push_back(temp);
-                    showlaenge+=temp.getHuman().size();
-                }
-            }
+    for (const House& haus : showablehouses) {
+        int bewohner = haus.getHuman().size();
+        
+        // Wenn die Seite durch das neue Haus zu voll würde -> Seite speichern, neu anfangen
+        if (personenAufSeite + bewohner > 15 && !aktuelleSeite.empty()) {
+            housesproseite.push_back(aktuelleSeite);
+            aktuelleSeite.clear();
+            personenAufSeite = 0;
+        }
+        aktuelleSeite.push_back(haus);
+        personenAufSeite += bewohner;
+    }
+    // Den verbleibenden Rest als letzte Seite hinzufügen
+    if (!aktuelleSeite.empty()) {
+        housesproseite.push_back(aktuelleSeite);
+    }
+
+    // 5. GUI-Elemente bauen (Mit QStackedWidget für das Blättern)
+    QStackedWidget* ergebnisStack = new QStackedWidget();
+
+    for (const auto& seite : housesproseite) {
+        // Für jede Seite ein eigenes Widget + Layout erstellen
+        QWidget* pageWidget = new QWidget();
+        QGridLayout* pageLayout = new QGridLayout(pageWidget);
+        
+        for (auto&& [j, h] : std::views::enumerate(seite)) {
+            pageLayout->addWidget(h.getLabel(), static_cast<int>(j), 0);
         }
         
-    QWidget *showzeigscreen[ceil(showlaenge/15)];
-    vector<vector<House>> housesproseite;
-    for(int i=0;i<ceil(showlaenge/15);i++){
-    if(showablehouses.empty())break;
-    for(int j=0;j<15;j++){
-    vector<House> seite;
-    if(showablehouses.empty())break;
-    short available=15;
-    seite.push_back(showablehouses[showablehouses.size()-1]);
-    available-=showablehouses[showablehouses.size()-1].getHuman().size();
-    if(available-showablehouses[showablehouses.size()-2]<0)break;
-    showablehouses.pop_back();
-   if(!seite.empty())housesproseite.push_back(seite);
+        // Die fertige Seite in den Stack legen
+        ergebnisStack->addWidget(pageWidget);
     }
-    }
-    QGridLayout *gridshowzeigscreen = new QGridLayout(showzeigscreen);
-    vector<QLabel*> showlabels;
-    for(const vector<House>& hps: housesproseite){
-        for(auto&&[i,h]: std::views::enumerate(hps)){
-        showlabels.push_back(h.getLabel());
-        gridshowzeigscreen->addWidget(showlabels[showlabels.size()-1],static_cast<int>(i),0);
-        }
+
+    // 6. Blätter-Buttons erstellen
+    QPushButton *seitezurueck = new QPushButton("<");
+    QPushButton *seiteweiter = new QPushButton(">");
+    seitezurueck->setFixedSize(50, 30);
+    seiteweiter->setFixedSize(50, 30);
+
+    // 7. Die Button-Logik! 
+    // Wir übergeben den ergebnisStack an die Lambdas, damit sie umschalten können
+    QObject::connect(seitezurueck, &QPushButton::clicked, [ergebnisStack]() {
+        int current = ergebnisStack->currentIndex();
+        if (current > 0) { // Nur zurückblättern, wenn wir nicht auf Seite 1 (Index 0) sind
+            ergebnisStack->setCurrentIndex(current - 1);
         }
     });
 
-    stackedWidget->addWidget(suchscreen);
-    //Ende suchscreen
+    QObject::connect(seiteweiter, &QPushButton::clicked, [ergebnisStack]() {
+        int current = ergebnisStack->currentIndex();
+        if (current < ergebnisStack->count() - 1) { // Nur weiterblättern, wenn es noch Seiten gibt
+            ergebnisStack->setCurrentIndex(current + 1);
+        }
+    });
+    });
+    // 8. Alles ins Haupt-Layout einfügen (Beispielhaft)
+    // Hier musst du die Elemente deinem gewünschten Screen zuweisen (z.B. einem showzeigscreen)
+    //mainLayout->addWidget(ergebnisStack, 0, 0, 1, 2); // Nimmt den ganzen oberen Platz ein
+    //mainLayout->addWidget(seitezurueck, 1, 0, Qt::AlignLeft);
+    //mainLayout->addWidget(seiteweiter, 1, 1, Qt::AlignRight);
+    
+    // stackedWidget->addWidget(showzeigscreen);
+    // stackedWidget->setCurrentWidget(showzeigscreen//Ende suchscreen
     //--------------------------------------------
     //hier Zeug fuer showzeigscreen
     
