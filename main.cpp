@@ -93,7 +93,7 @@ void registerPerson(string stadt, string strasse, string hausnummer, int preis, 
 
 int main(int argc, char *argv[])
 {
-    äsetup();
+    setup();
     QApplication app(argc, argv);
 
     QWidget window;
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
     QGridLayout *gridstart = new QGridLayout(start);
 
     QLabel *welcome = new QLabel("Willkommen im Monnema Grundbuch!");
-    welcome->setStyleSheet("font-size: 36px; font-weight: bold;");
+    welcome->setStyleSheet("font-size: 36px;font-weight: bold;");
     gridstart->addWidget(welcome,0,0,Qt::AlignCenter|Qt::AlignTop);
 
     QLabel *wasmachen = new QLabel("Was willsch machen?:");
@@ -127,7 +127,6 @@ int main(int argc, char *argv[])
                 QMessageBox::Yes | QMessageBox::No
                 );
             if(reply==QMessageBox::Yes){
-                &QWidget::close;
                 window.close();
             }
         }else{
@@ -297,19 +296,18 @@ int main(int argc, char *argv[])
     gridsuchscreen->addWidget(suchenauslesen,7,0,Qt::AlignCenter);
 
     QObject::connect(suchenauslesen, &QPushButton::clicked, [this, erstersuchinput]() {
-    // 1. Felder prüfen
     bool voll = false;
     for (QLineEdit *Line : erstersuchinput) {
         if (!Line->text().trimmed().isEmpty()) voll = true;
     }
     if (!voll) return;
 
-    QString genderText = erstersuchinput[4]->text().trimmed();
-    if (!genderText.isEmpty() && chooseg(genderText.toStdString()) == Gender::NONE) {
+    QString gendertext = erstersuchinput[4]->text().trimmed();
+    if (!gendertext.isEmpty() && chooseg(gendertext.toStdString()) == Gender::NONE) {
         return;
     }
 
-    // 2. Suchen (Ohne überflüssige Schleife!)
+
     vector<vector<string>> uebergeben;
     if (!erstersuchinput[0]->text().isEmpty())
         uebergeben.push_back(searchByCity(erstersuchinput[0]->text().toStdString()));
@@ -324,43 +322,41 @@ int main(int argc, char *argv[])
 
     vector<string> suchergebnisse = mergeCommonUnsortedStrings(uebergeben);
 
-    // 3. Häuser filtern (Mit Referenzen, um Kopien zu vermeiden)
+
     vector<House> showablehouses;
     for (const string& Id : suchergebnisse) {
-        for (const House& temp : cityy) { // cityy muss in der Klasse/Lambda verfügbar sein
+        for (const House& temp : cityy) {
             if (temp.getHouseId() == Id) {
                 showablehouses.push_back(temp);
             }
         }
     }
 
-    // 4. Robuste Seiten-Aufteilung (Ohne pop_back)
+
     vector<vector<House>> housesproseite;
-    vector<House> aktuelleSeite;
-    int personenAufSeite = 0;
+    vector<House> aktuelleseite;
+    int personenaufseite = 0;
 
     for (const House& haus : showablehouses) {
         int bewohner = haus.getHuman().size();
         
-        // Wenn die Seite durch das neue Haus zu voll würde -> Seite speichern, neu anfangen
-        if (personenAufSeite + bewohner > 15 && !aktuelleSeite.empty()) {
-            housesproseite.push_back(aktuelleSeite);
-            aktuelleSeite.clear();
-            personenAufSeite = 0;
+        if (personenaufseite + bewohner > 15 && !aktuelleseite.empty()) {
+            housesproseite.push_back(aktuelleseite);
+            aktuelleseite.clear();
+            personenaufseite = 0;
         }
-        aktuelleSeite.push_back(haus);
-        personenAufSeite += bewohner;
+        aktuelleseite.push_back(haus);
+        personenaufseite += bewohner;
     }
-    // Den verbleibenden Rest als letzte Seite hinzufügen
-    if (!aktuelleSeite.empty()) {
-        housesproseite.push_back(aktuelleSeite);
+    if (!aktuelleseite.empty()) {
+        housesproseite.push_back(aktuelleseite);
     }
 
-    // 5. GUI-Elemente bauen (Mit QStackedWidget für das Blättern)
-    QStackedWidget* ergebnisStack = new QStackedWidget();
+
+    QStackedWidget* ergebnisstack = new QStackedWidget();
 
     for (const auto& seite : housesproseite) {
-        // Für jede Seite ein eigenes Widget + Layout erstellen
+
         QWidget* pageWidget = new QWidget();
         QGridLayout* pageLayout = new QGridLayout(pageWidget);
         
@@ -368,40 +364,44 @@ int main(int argc, char *argv[])
             pageLayout->addWidget(h.getLabel(), static_cast<int>(j), 0);
         }
         
-        // Die fertige Seite in den Stack legen
-        ergebnisStack->addWidget(pageWidget);
+
+        ergebnisstack->addWidget(pageWidget);
     }
 
-    // 6. Blätter-Buttons erstellen
+
     QPushButton *seitezurueck = new QPushButton("<");
     QPushButton *seiteweiter = new QPushButton(">");
     seitezurueck->setFixedSize(50, 30);
     seiteweiter->setFixedSize(50, 30);
-
-    // 7. Die Button-Logik! 
-    // Wir übergeben den ergebnisStack an die Lambdas, damit sie umschalten können
-    QObject::connect(seitezurueck, &QPushButton::clicked, [ergebnisStack]() {
-        int current = ergebnisStack->currentIndex();
-        if (current > 0) { // Nur zurückblättern, wenn wir nicht auf Seite 1 (Index 0) sind
-            ergebnisStack->setCurrentIndex(current - 1);
-        }
-    });
-
-    QObject::connect(seiteweiter, &QPushButton::clicked, [ergebnisStack]() {
-        int current = ergebnisStack->currentIndex();
-        if (current < ergebnisStack->count() - 1) { // Nur weiterblättern, wenn es noch Seiten gibt
-            ergebnisStack->setCurrentIndex(current + 1);
-        }
-    });
-    });
-    // 8. Alles ins Haupt-Layout einfügen (Beispielhaft)
-    // Hier musst du die Elemente deinem gewünschten Screen zuweisen (z.B. einem showzeigscreen)
-    //mainLayout->addWidget(ergebnisStack, 0, 0, 1, 2); // Nimmt den ganzen oberen Platz ein
-    //mainLayout->addWidget(seitezurueck, 1, 0, Qt::AlignLeft);
-    //mainLayout->addWidget(seiteweiter, 1, 1, Qt::AlignRight);
     
-    // stackedWidget->addWidget(showzeigscreen);
-    // stackedWidget->setCurrentWidget(showzeigscreen//Ende suchscreen
+    
+    QObject::connect(seitezurueck, &QPushButton::clicked, [ergebnisstack]() {
+        int current = ergebnisstack->currentIndex();
+        if (current > 0) {
+            ergebnisstack->setCurrentIndex(current - 1);
+        }
+    });
+
+    QObject::connect(seiteweiter, &QPushButton::clicked, [ergebnisstack]() {
+        int current = ergebnisstack->currentIndex();
+        if (current < ergebnisstack->count() - 1) {
+            ergebnisstack->setCurrentIndex(current + 1);
+        }
+    });
+    QWidget *showzeigscreen = new QWidget();
+    QGridLayout *showzeigLayout = new QGridLayout(showzeigscreen);
+
+
+    showzeigLayout->addWidget(ergebnisstack, 0, 0, 1, 2);
+
+
+    showzeigLayout->addWidget(seitezurueck, 1, 0, Qt::AlignLeft);
+    showzeigLayout->addWidget(seiteweiter, 1, 1, Qt::AlignRight);
+
+
+    stackedWidget->addWidget(showzeigscreen);
+    stackedWidget->setCurrentWidget(showzeigscreen);
+});
     //--------------------------------------------
     //hier Zeug fuer showzeigscreen
     
@@ -409,12 +409,6 @@ int main(int argc, char *argv[])
     //Ende Showzeigscreen
     //--------------------------------------------
     //hier Zeug fuer showscreen
-    QWidget *showscreen = new QWidget();
-    QGridLayout *gridshowscreen = new QGridLayout(showscreen);
-
-    stackedWidget->addWidget(showscreen);
-
-    //Ende Showscreen
 
     window.show();
 
