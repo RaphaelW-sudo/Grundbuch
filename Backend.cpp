@@ -1,11 +1,55 @@
 
 #include "Backend.h"
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <QString>
 #include <QDebug>
 #include <QLabel>
 
 using namespace std;
+#include <fstream>
+#include <sstream>
+#include <iostream>
+
+void loadFromFile() {
+    std::ifstream file("Grundbuch.txt");
+
+    if (!file.is_open()) {
+        std::ofstream createFile("Grundbuch.txt");
+        createFile.close();
+        return;
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        if (line.empty()) continue;
+
+        std::stringstream ss(line);
+        std::string name, stadt, strasse, hausnummer, gender;
+        std::string alterStr, preisStr, groesseStr;
+
+
+        std::getline(ss, name, ';');
+        std::getline(ss, stadt, ';');
+        std::getline(ss, strasse, ';');
+        std::getline(ss, hausnummer, ';');
+        std::getline(ss, gender, ';');
+        std::getline(ss, alterStr, ';');
+        std::getline(ss, preisStr, ';');
+        std::getline(ss, groesseStr, ';');
+
+        if (!name.empty() && !alterStr.empty()) {
+            int alter = std::stoi(alterStr);
+            int preis = std::stoi(preisStr);
+            int groesse = std::stoi(groesseStr);
+
+
+            addEntry(name, stadt, strasse, hausnummer, gender, alter, preis, groesse);
+        }
+    }
+    file.close();
+}
 
 vector<House> cityy;
 
@@ -89,7 +133,6 @@ string genderToString(Gender g) {
 }
 
 void writefile(const House& house, ofstream& file) {
-    // Left unimplemented as in your original file
 }
 
 vector<string> searchByName(const string& input) {
