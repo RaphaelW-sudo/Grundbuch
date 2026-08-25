@@ -1,4 +1,3 @@
-
 #include "mainwindow.h"
 #include "Backend.h"
 #include <QApplication>
@@ -16,6 +15,8 @@
 #include <QLabel>
 #include <QShortcut>
 #include <QKeySequence>
+#include <QRegularExpressionValidator>
+#include <QRegularExpression>
 
 using namespace std;
 
@@ -44,21 +45,28 @@ void registerPerson(string stadt, string strasse, string hausnummer, int preis, 
     dialog.setWindowTitle("Bestätigung");
     dialog.setFixedSize(500, 500);
 
+
+    QRegularExpression rx("^[^;]*$"); 
+    QValidator *validator = new QRegularExpressionValidator(rx, this);
+    
     QGridLayout *dialogLayout = new QGridLayout(&dialog);
     string titel = "Bitte Daten zu Person Nr." + to_string(PersonNr) + " angeben";
     dialogLayout->addWidget(new QLabel(QString::fromStdString(titel)), 0, 0, Qt::AlignCenter);
 
     QLineEdit *ageinput = new QLineEdit();
     ageinput->setPlaceholderText("Alter");
+    ageinput->setValidator(validator);
     ageinput->setFixedSize(300, 50);
     dialogLayout->addWidget(ageinput, 1, 0, Qt::AlignCenter);
 
     QLineEdit *genderinput = new QLineEdit();
+    ageinput->setValidator(validator);
     genderinput->setPlaceholderText("Sexuelle Ausrichtung");
     genderinput->setFixedSize(300, 50);
     dialogLayout->addWidget(genderinput, 2, 0, Qt::AlignCenter);
 
     QLineEdit *nameinput = new QLineEdit();
+    ageinput->setValidator(validator);
     nameinput->setPlaceholderText("Name");
     nameinput->setFixedSize(300, 50);
     dialogLayout->addWidget(nameinput, 3, 0, Qt::AlignCenter);
@@ -215,8 +223,12 @@ int main(int argc, char *argv[])
     vector<QLineEdit*> ersterinput;
     vector<string*> ersterinputstring;
 
+QRegularExpression rx("^[^;]*$"); 
+QValidator *validator = new QRegularExpressionValidator(rx, this);
+    
     for(int i=0;i<6;i++){
         QLineEdit *Line = new QLineEdit();
+        Line->setValidator(validator);
         Line->setStyleSheet("font-size: 22px; padding: 8px 12px;");
         Line->setMinimumWidth(450);
         gridhinzufscreen->addWidget(Line,i+1,0,Qt::AlignCenter);
@@ -277,8 +289,13 @@ int main(int argc, char *argv[])
     titelsuch->setStyleSheet("font-size:24px");
     gridsuchscreen->addWidget(titelsuch,0,0,Qt::AlignCenter);
 
+
+    QRegularExpression rx("^[^;]*$"); 
+    QValidator *validator = new QRegularExpressionValidator(rx, this);
+    
     for(int i=0;i<5;i++){
         QLineEdit *Line = new QLineEdit();
+        Line->setValidator(validator)
         Line->setStyleSheet("font-size: 22px; padding: 8px 12px;");
         Line->setMinimumWidth(450);
         gridsuchscreen->addWidget(Line,i+2,0,Qt::AlignCenter);
