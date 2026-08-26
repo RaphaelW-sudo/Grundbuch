@@ -312,7 +312,7 @@ QValidator *validator = new QRegularExpressionValidator(rx, this);
     suchenauslesen->setStyleSheet("padding: 30px 200px");
     gridsuchscreen->addWidget(suchenauslesen,7,0,Qt::AlignCenter);
 
-    QObject::connect(suchenauslesen, &QPushButton::clicked, [this, erstersuchinput]() {
+    QObject::connect(suchenauslesen, &QPushButton::clicked, [erstersuchinput]() {
     bool voll = false;
     for (QLineEdit *Line : erstersuchinput) {
         if (!Line->text().trimmed().isEmpty()) voll = true;
